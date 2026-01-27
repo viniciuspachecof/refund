@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-*: initial;
+
+  --color-white: #ffffff;
+
+  --color-gray-100: #1f2523;
+  --color-gray-200: #4d5c57;
+  --color-gray-300: #cdd5d2;
+  --color-gray-400: #e4ece9;
+  --color-gray-500: #f9fbfa;
+
+  --color-green-100: #1f8459;
+  --color-green-200: #2cb178;
+
+  --font-sans: 'Open Sans', sans-serif;
+
+  --text-title-lg: 24px;
+  --text-title-md: 20px;
+
+  --text-lg: 14px;
+  --text-md: 12px;
+  --text-sm: 10px;
+}
+
+@layer base {
+  body {
+    color: #4d5c57;
+    background-color: #e4ece8;
+  }
+}
