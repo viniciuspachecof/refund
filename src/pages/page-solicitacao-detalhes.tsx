@@ -1,10 +1,12 @@
 import { FileIcon } from '@phosphor-icons/react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { ExcluirSolicitacao } from '../components/excluir-solicitacao';
 
-export function PageSolicitacao() {
+export function PageSolicitacaoDetalhes() {
   return (
     <div className="max-w-lg m-auto mb-14 bg-white p-10 rounded-2xl">
       <h2 className="font-bold text-title-md text-gray-100 mb-3">Solicitação de reembolso</h2>
-      <p className="text-lg">Dados da despesa para solicitar reembolso</p>
+      <p className="text-lg">Dados da despesa para solicitar reembolso.</p>
 
       <form action="" className="mt-10">
         <div className="mb-8">
@@ -12,6 +14,7 @@ export function PageSolicitacao() {
           <input
             type="text"
             className="px-4 py-3 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100"
+            disabled
           />
         </div>
 
@@ -22,6 +25,7 @@ export function PageSolicitacao() {
               className="px-4 py-3 border border-gray-300 text-gray-200 text-lg rounded-lg outline-none w-full"
               name=""
               id=""
+              disabled
             ></select>
           </div>
 
@@ -30,6 +34,7 @@ export function PageSolicitacao() {
             <input
               type="text"
               className="px-4 py-3 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100"
+              disabled
             />
           </div>
         </div>
@@ -43,9 +48,15 @@ export function PageSolicitacao() {
           </a>
         </div>
 
-        <button className="w-full bg-green-100 text-white font-bold text-lg rounded-lg p-4 cursor-pointer hover:bg-green-200 transition duration-100">
-          Excluir
-        </button>
+        <Dialog.Root>
+          <Dialog.Trigger asChild>
+            <button className="w-full bg-green-100 text-white font-bold text-lg rounded-lg p-4 cursor-pointer hover:bg-green-200 transition duration-100">
+              Excluir
+            </button>
+          </Dialog.Trigger>
+
+          <ExcluirSolicitacao />
+        </Dialog.Root>
       </form>
     </div>
   );

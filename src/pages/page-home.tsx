@@ -6,7 +6,7 @@ export function PageHome() {
     <div className="max-w-270.5 m-auto mb-14 bg-white p-10 rounded-2xl">
       <h2 className="font-bold text-title-md mb-6 text-gray-100">Solicitações</h2>
 
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 pb-6 mb-6 border-b border-gray-400">
         <input
           type="text"
           placeholder="Pesquisar pelo nome"
@@ -17,7 +17,7 @@ export function PageHome() {
         </button>
       </div>
 
-      <ul className="flex flex-col gap-4 mb-6">
+      <ul className="flex flex-col gap-2 mb-6">
         {Array.from({ length: 6 }, () => (
           <li>
             <RegistroSolicitacao />

@@ -1,7 +1,8 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { PageHome } from './pages/page-home';
-import { PageSolicitacao } from './pages/page-solicitacao';
+import { PageSolicitacaoDetalhes } from './pages/page-solicitacao-detalhes';
 import { LayoutMain } from './pages/layout-main';
+import { PageSolicitacaoNovo } from './pages/page-solicitacao-novo';
 
 function App() {
   return (
@@ -10,7 +11,8 @@ function App() {
         <Routes>
           <Route element={<LayoutMain />}>
             <Route index element={<PageHome />} />
-            <Route path="/solicitacao" element={<PageSolicitacao />} />
+            <Route path="/solicitacao/:id" element={<PageSolicitacaoDetalhes />} />
+            <Route path="/nova-solicitacao" element={<PageSolicitacaoNovo />} />
           </Route>
         </Routes>
       </BrowserRouter>
