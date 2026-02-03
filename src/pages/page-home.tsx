@@ -1,7 +1,32 @@
 import { CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { RegistroSolicitacao } from '../components/registro-solicitacao';
+import { useEffect, useState } from 'react';
+import { api } from '../lib/axios';
+import type { IRefund } from '../interface/IRefund';
+
+interface InfoListRefunds {
+  currentPage: number;
+  total: number;
+}
 
 export function PageHome() {
+  const [refunds, setRefunds] = useState<IRefund[]>();
+  const [infoListRefunds, setInfoListRefunds] = useState<InfoListRefunds>({
+    currentPage: 0,
+    total: 0,
+  });
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data } = await api.get('/refunds');
+
+      setRefunds(data.refunds.data);
+      setInfoListRefunds(data.refunds.meta);
+    }
+
+    fetchData();
+  }, []);
+
   return (
     <div className="max-w-270.5 m-auto mb-14 bg-white p-10 rounded-2xl">
       <h2 className="font-bold text-title-md mb-6 text-gray-100">Solicitações</h2>
@@ -18,9 +43,9 @@ export function PageHome() {
       </div>
 
       <ul className="flex flex-col gap-2 mb-6">
-        {Array.from({ length: 6 }, () => (
-          <li>
-            <RegistroSolicitacao />
+        {refunds?.map((refund) => (
+          <li key={refund.id}>
+            <RegistroSolicitacao {...refund} />
           </li>
         ))}
       </ul>
@@ -29,7 +54,7 @@ export function PageHome() {
         <div className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100">
           <CaretLeftIcon size={24} className="text-white" />
         </div>
-        <span className="text-lg">1/5</span>
+        <span className="text-lg">{`${infoListRefunds.currentPage}/${infoListRefunds.total}`}</span>
         <div className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100">
           <CaretRightIcon size={24} className="text-white" />
         </div>
