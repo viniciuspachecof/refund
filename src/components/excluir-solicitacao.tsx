@@ -1,6 +1,27 @@
 import * as Dialog from '@radix-ui/react-dialog';
+import { api } from '../lib/axios';
+import { useNavigate } from 'react-router-dom';
 
-export function ExcluirSolicitacao() {
+interface ExcluirSolicitacaoProps {
+  id?: string;
+  onSuccess: () => void;
+}
+
+export function ExcluirSolicitacao({ id, onSuccess }: ExcluirSolicitacaoProps) {
+  const navigate = useNavigate();
+
+  function handleDeletarSolicitacao() {
+    try {
+      api.delete(`/refunds/${id}`);
+      onSuccess();
+
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir');
+    }
+  }
+
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="fixed w-screen h-screen inset-0 bg-black-modal" />
@@ -16,7 +37,10 @@ export function ExcluirSolicitacao() {
             </button>
           </Dialog.DialogClose>
 
-          <button className="bg-green-100 text-white font-bold text-lg rounded-lg p-4 cursor-pointer hover:bg-green-200 transition duration-100">
+          <button
+            onClick={handleDeletarSolicitacao}
+            className="bg-green-100 text-white font-bold text-lg rounded-lg p-4 cursor-pointer hover:bg-green-200 transition duration-100"
+          >
             Confirmar
           </button>
         </div>

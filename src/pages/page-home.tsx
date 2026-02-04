@@ -6,14 +6,14 @@ import type { IRefund } from '../interface/IRefund';
 
 interface InfoListRefunds {
   currentPage: number;
-  total: number;
+  lastPage: number;
 }
 
 export function PageHome() {
   const [refunds, setRefunds] = useState<IRefund[]>();
   const [infoListRefunds, setInfoListRefunds] = useState<InfoListRefunds>({
     currentPage: 0,
-    total: 0,
+    lastPage: 0,
   });
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function PageHome() {
         <div className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100">
           <CaretLeftIcon size={24} className="text-white" />
         </div>
-        <span className="text-lg">{`${infoListRefunds.currentPage}/${infoListRefunds.total}`}</span>
+        <span className="text-lg">{`${infoListRefunds.currentPage}/${infoListRefunds.lastPage}`}</span>
         <div className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100">
           <CaretRightIcon size={24} className="text-white" />
         </div>

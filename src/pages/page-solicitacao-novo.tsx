@@ -32,7 +32,13 @@ export function PageSolicitacaoNovo() {
               className="px-4 py-3 border border-gray-300 text-gray-200 text-lg rounded-lg outline-none w-full"
               name=""
               id=""
-            ></select>
+            >
+              <option value="food">Alimentação</option>
+              <option value="hosting">Hospedagem</option>
+              <option value="transport">Transporte</option>
+              <option value="services">Serviços</option>
+              <option value="other">Outros</option>
+            </select>
           </div>
 
           <div className="flex-1">
