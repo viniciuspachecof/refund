@@ -4,10 +4,11 @@ import { PageSolicitacaoDetalhes } from './pages/page-solicitacao-detalhes';
 import { LayoutMain } from './pages/layout-main';
 import { PageSolicitacaoNovo } from './pages/page-solicitacao-novo';
 import { PageSolicitacaoEnviado } from './pages/page-solicitacao-enviado';
+import { NuqsAdapter } from 'nuqs/adapters/react';
 
 function App() {
   return (
-    <>
+    <NuqsAdapter>
       <BrowserRouter>
         <Routes>
           <Route element={<LayoutMain />}>
@@ -18,7 +19,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </>
+    </NuqsAdapter>
   );
 }
 

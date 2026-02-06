@@ -1,13 +1,19 @@
 import { CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { RegistroSolicitacao } from '../components/registro-solicitacao';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/axios';
 import type { IRefund } from '../interface/IRefund';
+import { createSerializer, parseAsString, useQueryState } from 'nuqs';
+import { debounce } from '../helpers/utils';
 
 interface InfoListRefunds {
   currentPage: number;
   lastPage: number;
 }
+
+const toSearchParams = createSerializer({
+  q: parseAsString,
+});
 
 export function PageHome() {
   const [refunds, setRefunds] = useState<IRefund[]>();
@@ -15,8 +21,17 @@ export function PageHome() {
     currentPage: 0,
     lastPage: 0,
   });
+  const [q, setQ] = useQueryState('q');
+  const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
+    async function fetchDataFiltrado() {
+      const { data } = await api.get(`/refunds${toSearchParams({ q })}`);
+
+      setRefunds(data.refunds.data);
+      setInfoListRefunds(data.refunds.meta);
+    }
+
     async function fetchData() {
       const { data } = await api.get('/refunds');
 
@@ -24,8 +39,32 @@ export function PageHome() {
       setInfoListRefunds(data.refunds.meta);
     }
 
-    fetchData();
+    if (q) {
+      fetchDataFiltrado();
+    } else {
+      fetchData();
+    }
   }, []);
+
+  const debouncedSetValue = useMemo(() => {
+    return debounce((value: string) => {
+      setQ(value);
+    }, 200);
+  }, [setQ]);
+
+  async function listasFiltradas() {
+    const { data } = await api.get(`/refunds${toSearchParams({ q })}`);
+
+    setRefunds(data.refunds.data);
+    setInfoListRefunds(data.refunds.meta);
+  }
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+
+    setInputValue(value);
+    debouncedSetValue(value);
+  }
 
   return (
     <div className="max-w-270.5 m-auto mb-14 bg-white p-10 rounded-2xl">
@@ -36,8 +75,13 @@ export function PageHome() {
           type="text"
           placeholder="Pesquisar pelo nome"
           className="px-4 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100"
+          onChange={handleInputChange}
+          value={inputValue}
         />
-        <button className="bg-green-100 rounded-lg p-3 cursor-pointer hover:bg-green-200 transition duration-100">
+        <button
+          className="bg-green-100 rounded-lg p-3 cursor-pointer hover:bg-green-200 transition duration-100"
+          onClick={listasFiltradas}
+        >
           <MagnifyingGlassIcon className="text-white" size={24} />
         </button>
       </div>
