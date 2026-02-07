@@ -66,6 +66,32 @@ export function PageHome() {
     debouncedSetValue(value);
   }
 
+  async function handlePreviousPage() {
+    const previousPage = infoListRefunds.currentPage - 1;
+
+    const { data } = await api.get('/refunds', {
+      params: {
+        page: previousPage,
+      },
+    });
+
+    setRefunds(data.refunds.data);
+    setInfoListRefunds(data.refunds.meta);
+  }
+
+  async function handleNextPage() {
+    const nextPage = infoListRefunds.currentPage + 1;
+
+    const { data } = await api.get('/refunds', {
+      params: {
+        page: nextPage,
+      },
+    });
+
+    setRefunds(data.refunds.data);
+    setInfoListRefunds(data.refunds.meta);
+  }
+
   return (
     <div className="max-w-270.5 m-auto mb-14 bg-white p-10 rounded-2xl">
       <h2 className="font-bold text-title-md mb-6 text-gray-100">Solicitações</h2>
@@ -95,13 +121,21 @@ export function PageHome() {
       </ul>
 
       <div className="flex items-center justify-center gap-2.5">
-        <div className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100">
+        <button
+          onClick={handlePreviousPage}
+          className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100"
+        >
           <CaretLeftIcon size={24} className="text-white" />
-        </div>
+        </button>
+
         <span className="text-lg">{`${infoListRefunds.currentPage}/${infoListRefunds.lastPage}`}</span>
-        <div className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100">
+
+        <button
+          onClick={handleNextPage}
+          className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100"
+        >
           <CaretRightIcon size={24} className="text-white" />
-        </div>
+        </button>
       </div>
     </div>
   );

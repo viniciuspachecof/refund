@@ -2,7 +2,7 @@ import { FileIcon } from '@phosphor-icons/react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ExcluirSolicitacao } from '../components/excluir-solicitacao';
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { api } from '../lib/axios';
 import type { IRefund } from '../interface/IRefund';
 
@@ -20,6 +20,14 @@ export function PageSolicitacaoDetalhes() {
 
     fetchData();
   }, [id]);
+
+  async function handleAbrirComprovante(e: FormEvent) {
+    e.preventDefault();
+
+    const { data } = await api.get(`/receipts/download/${refund?.receipt.id}`);
+
+    window.open(`${import.meta.env.VITE_API_URL}${data.url}`, '_blank', 'noopener,noreferrer');
+  }
 
   return (
     <div className="max-w-lg m-auto mb-14 bg-white p-10 rounded-2xl">
@@ -67,12 +75,12 @@ export function PageSolicitacaoDetalhes() {
         </div>
 
         <div className="flex justify-center mb-7">
-          <a
-            href=""
-            className="text-green-100 font-semibold text-lg flex items-center gap-1.75 hover:text-green-200 transition duration-100"
+          <button
+            onClick={handleAbrirComprovante}
+            className="cursor-pointer text-green-100 font-semibold text-lg flex items-center gap-1.75 hover:text-green-200 transition duration-100"
           >
             <FileIcon size={18} weight="bold" /> Abrir comprovante
-          </a>
+          </button>
         </div>
 
         <Dialog.Root open={modalOpen} onOpenChange={setModalOpen}>
