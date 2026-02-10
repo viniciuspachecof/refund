@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import z from 'zod';
 import { api } from '../lib/axios';
+import { toast } from 'sonner';
 
 const refundForm = z.object({
   title: z.string().min(1, 'Escreva sua solicitação'),
@@ -22,7 +23,7 @@ export function PageSolicitacaoNovo() {
     resolver: zodResolver(refundForm),
   });
 
-  async function handleEnviarSolicitacao(data: RefundForm) {
+  async function handleSendRequest(data: RefundForm) {
     if (!file) {
       alert('É obrigatório anexar um comprovante');
       return;
@@ -49,15 +50,16 @@ export function PageSolicitacaoNovo() {
       });
 
       navigate('/solicitacao-enviada');
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao criar registro');
+    } catch (error) {
+      toast.error('Erro ao excluir solicitação');
+
+      throw error;
     }
   }
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function handleClickAnexar() {
+  function handleAttachment() {
     inputRef.current?.click();
   }
 
@@ -79,7 +81,7 @@ export function PageSolicitacaoNovo() {
       <h2 className="font-bold text-title-md text-gray-100 mb-3">Nova solicitação de reembolso</h2>
       <p className="text-lg">Dados da despesa para solicitar reembolso.</p>
 
-      <form onSubmit={handleSubmit(handleEnviarSolicitacao)} className="mt-10">
+      <form onSubmit={handleSubmit(handleSendRequest)} className="mt-10">
         <div className="mb-8">
           <label className="text-sm inline-block mb-2">NOME DA SOLICITAÇÃO</label>
           <input
@@ -125,7 +127,7 @@ export function PageSolicitacaoNovo() {
             />
             <button
               className="p-3 bg-green-100 rounded-lg cursor-pointer hover:bg-green-200 transition duration-100"
-              onClick={handleClickAnexar}
+              onClick={handleAttachment}
               type="button"
             >
               <CloudArrowUpIcon size={24} className="text-white" />

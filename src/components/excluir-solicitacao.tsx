@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { api } from '../lib/axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface ExcluirSolicitacaoProps {
   id?: string;
@@ -10,15 +11,18 @@ interface ExcluirSolicitacaoProps {
 export function ExcluirSolicitacao({ id, onSuccess }: ExcluirSolicitacaoProps) {
   const navigate = useNavigate();
 
-  function handleDeletarSolicitacao() {
+  async function handleDeleteRequest() {
     try {
-      api.delete(`/refunds/${id}`);
+      await api.delete(`/refunds/${id}`);
       onSuccess();
 
       navigate('/');
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao excluir');
+
+      toast.success('Solicitação excluída com sucesso');
+    } catch (error) {
+      toast.error('Erro ao excluir a solicitação');
+
+      throw error;
     }
   }
 
@@ -38,7 +42,7 @@ export function ExcluirSolicitacao({ id, onSuccess }: ExcluirSolicitacaoProps) {
           </Dialog.DialogClose>
 
           <button
-            onClick={handleDeletarSolicitacao}
+            onClick={handleDeleteRequest}
             className="bg-green-100 text-white font-bold text-lg rounded-lg p-4 cursor-pointer hover:bg-green-200 transition duration-100"
           >
             Confirmar

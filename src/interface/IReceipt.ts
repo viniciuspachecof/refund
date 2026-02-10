@@ -4,6 +4,4 @@ export interface IReceipt {
   filename: string;
   path: string;
   extname: string;
-  createdAt: Date;
-  updatedAt: Date;
 }

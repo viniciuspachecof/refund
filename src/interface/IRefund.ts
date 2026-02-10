@@ -5,7 +5,5 @@ export interface IRefund {
   title: string;
   category: string;
   value: number;
-  createdAt: Date;
-  updatedAt: Date;
   receipt: IReceipt;
 }

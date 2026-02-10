@@ -5,28 +5,41 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api } from '../lib/axios';
 import type { IRefund } from '../interface/IRefund';
+import { toast } from 'sonner';
 
 export function PageSolicitacaoDetalhes() {
-  const [refund, setRefund] = useState<IRefund>();
   const { id } = useParams();
+  const [refund, setRefund] = useState<IRefund>();
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
-      const { data } = await api.get(`/refunds/${id}`);
+      try {
+        const { data } = await api.get(`/refunds/${id}`);
 
-      setRefund(data.refund);
+        setRefund(data.refund);
+      } catch (error) {
+        toast.error('Erro ao recuperar solicitação');
+
+        throw error;
+      }
     }
 
     fetchData();
   }, [id]);
 
-  async function handleAbrirComprovante(e: FormEvent) {
+  async function handleOpenProof(e: FormEvent) {
     e.preventDefault();
 
-    const { data } = await api.get(`/receipts/download/${refund?.receipt.id}`);
+    try {
+      const { data } = await api.get(`/receipts/download/${refund?.receipt.id}`);
 
-    window.open(`${import.meta.env.VITE_API_URL}${data.url}`, '_blank', 'noopener,noreferrer');
+      window.open(import.meta.env.VITE_API_URL + data.url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      toast.error('Erro ao exibir comprovante');
+
+      throw error;
+    }
   }
 
   return (
@@ -76,7 +89,7 @@ export function PageSolicitacaoDetalhes() {
 
         <div className="flex justify-center mb-7">
           <button
-            onClick={handleAbrirComprovante}
+            onClick={handleOpenProof}
             className="cursor-pointer text-green-100 font-semibold text-lg flex items-center gap-1.75 hover:text-green-200 transition duration-100"
           >
             <FileIcon size={18} weight="bold" /> Abrir comprovante

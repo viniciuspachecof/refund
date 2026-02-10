@@ -5,17 +5,19 @@ import { LayoutMain } from './pages/layout-main';
 import { PageSolicitacaoNovo } from './pages/page-solicitacao-novo';
 import { PageSolicitacaoEnviado } from './pages/page-solicitacao-enviado';
 import { NuqsAdapter } from 'nuqs/adapters/react';
+import { Toaster } from 'sonner';
 
 function App() {
   return (
     <NuqsAdapter>
+      <Toaster position="bottom-center" />
       <BrowserRouter>
         <Routes>
           <Route element={<LayoutMain />}>
             <Route index element={<PageHome />} />
             <Route path="/solicitacao/:id" element={<PageSolicitacaoDetalhes />} />
             <Route path="/nova-solicitacao" element={<PageSolicitacaoNovo />} />
-            <Route path="/solicitacao-enviada" element={<PageSolicitacaoEnviado />} />
+            <Route path="/solicitacao-enviada" element={<PageSolicitacaoEnviado />} /> {/* Verificar */}
           </Route>
         </Routes>
       </BrowserRouter>

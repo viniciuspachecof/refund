@@ -5,6 +5,7 @@ import { api } from '../lib/axios';
 import type { IRefund } from '../interface/IRefund';
 import { createSerializer, parseAsString, useQueryState } from 'nuqs';
 import { debounce } from '../helpers/utils';
+import { toast } from 'sonner';
 
 interface InfoListRefunds {
   currentPage: number;
@@ -21,43 +22,47 @@ export function PageHome() {
     currentPage: 0,
     lastPage: 0,
   });
+
   const [q, setQ] = useQueryState('q');
   const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
-    async function fetchDataFiltrado() {
+    async function fetchData() {
+      const methodGet = q ? `/refunds${toSearchParams({ q })}` : '/refunds';
+
+      try {
+        const { data } = await api.get(methodGet);
+
+        setRefunds(data.refunds.data);
+        setInfoListRefunds(data.refunds.meta);
+      } catch (error) {
+        toast.error('Erro ao carregar lista');
+
+        throw error;
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  async function handleFilterRequest() {
+    try {
       const { data } = await api.get(`/refunds${toSearchParams({ q })}`);
 
       setRefunds(data.refunds.data);
       setInfoListRefunds(data.refunds.meta);
-    }
+    } catch (error) {
+      toast.error('Erro ao filtrar lista');
 
-    async function fetchData() {
-      const { data } = await api.get('/refunds');
-
-      setRefunds(data.refunds.data);
-      setInfoListRefunds(data.refunds.meta);
+      throw error;
     }
-
-    if (q) {
-      fetchDataFiltrado();
-    } else {
-      fetchData();
-    }
-  }, []);
+  }
 
   const debouncedSetValue = useMemo(() => {
     return debounce((value: string) => {
       setQ(value);
     }, 200);
   }, [setQ]);
-
-  async function listasFiltradas() {
-    const { data } = await api.get(`/refunds${toSearchParams({ q })}`);
-
-    setRefunds(data.refunds.data);
-    setInfoListRefunds(data.refunds.meta);
-  }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
@@ -69,27 +74,39 @@ export function PageHome() {
   async function handlePreviousPage() {
     const previousPage = infoListRefunds.currentPage - 1;
 
-    const { data } = await api.get('/refunds', {
-      params: {
-        page: previousPage,
-      },
-    });
+    try {
+      const { data } = await api.get('/refunds', {
+        params: {
+          page: previousPage,
+        },
+      });
 
-    setRefunds(data.refunds.data);
-    setInfoListRefunds(data.refunds.meta);
+      setRefunds(data.refunds.data);
+      setInfoListRefunds(data.refunds.meta);
+    } catch (error) {
+      toast.error('Erro ao ir para a página anterior');
+
+      throw error;
+    }
   }
 
   async function handleNextPage() {
     const nextPage = infoListRefunds.currentPage + 1;
 
-    const { data } = await api.get('/refunds', {
-      params: {
-        page: nextPage,
-      },
-    });
+    try {
+      const { data } = await api.get('/refunds', {
+        params: {
+          page: nextPage,
+        },
+      });
 
-    setRefunds(data.refunds.data);
-    setInfoListRefunds(data.refunds.meta);
+      setRefunds(data.refunds.data);
+      setInfoListRefunds(data.refunds.meta);
+    } catch (error) {
+      toast.error('Erro ao ir para a próxima página');
+
+      throw error;
+    }
   }
 
   return (
@@ -106,7 +123,7 @@ export function PageHome() {
         />
         <button
           className="bg-green-100 rounded-lg p-3 cursor-pointer hover:bg-green-200 transition duration-100"
-          onClick={listasFiltradas}
+          onClick={handleFilterRequest}
         >
           <MagnifyingGlassIcon className="text-white" size={24} />
         </button>
