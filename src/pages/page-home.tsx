@@ -122,7 +122,8 @@ export function PageHome() {
           value={inputValue}
         />
         <button
-          className="bg-green-100 rounded-lg p-3 cursor-pointer hover:bg-green-200 transition duration-100"
+          disabled={!inputValue}
+          className="bg-green-100 rounded-lg p-3 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
           onClick={handleFilterRequest}
         >
           <MagnifyingGlassIcon className="text-white" size={24} />
@@ -140,7 +141,8 @@ export function PageHome() {
       <div className="flex items-center justify-center gap-2.5">
         <button
           onClick={handlePreviousPage}
-          className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100"
+          className="rounded-lg bg-green-100 p-1 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
+          disabled={infoListRefunds.currentPage <= 1}
         >
           <CaretLeftIcon size={24} className="text-white" />
         </button>
@@ -149,7 +151,8 @@ export function PageHome() {
 
         <button
           onClick={handleNextPage}
-          className="rounded-lg bg-green-100 p-1 cursor-pointer hover:bg-green-200 transition duration-100"
+          className="rounded-lg bg-green-100 p-1 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
+          disabled={infoListRefunds.currentPage >= infoListRefunds.lastPage}
         >
           <CaretRightIcon size={24} className="text-white" />
         </button>

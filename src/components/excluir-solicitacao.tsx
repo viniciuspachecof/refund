@@ -20,7 +20,7 @@ export function ExcluirSolicitacao({ id, onSuccess }: ExcluirSolicitacaoProps) {
 
       toast.success('Solicitação excluída com sucesso');
     } catch (error) {
-      toast.error('Erro ao excluir a solicitação');
+      toast.error('Erro ao excluir solicitação');
 
       throw error;
     }

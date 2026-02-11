@@ -1,16 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CloudArrowUpIcon } from '@phosphor-icons/react';
 import { useRef, useState, type ChangeEvent } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import z from 'zod';
 import { api } from '../lib/axios';
 import { toast } from 'sonner';
+import { NumericFormat } from 'react-number-format';
 
 const refundForm = z.object({
-  title: z.string().min(1, 'Escreva sua solicitação'),
-  category: z.string().min(1, 'Informe a categoria'),
-  value: z.number().min(1, 'Informe um valor maior que 0'),
+  title: z.string().min(1, 'Informe sua solicitação'),
+  category: z.string().min(1, 'Informe uma categoria'),
+  value: z.number().min(0.01, 'Informe um valor'),
 });
 
 type RefundForm = z.infer<typeof refundForm>;
@@ -18,14 +19,43 @@ type RefundForm = z.infer<typeof refundForm>;
 export function PageSolicitacaoNovo() {
   const navigate = useNavigate();
   const [file, setFile] = useState<File>();
+  const [errorAttachment, setErrorAttachment] = useState('');
 
-  const { register, handleSubmit } = useForm<RefundForm>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<RefundForm>({
     resolver: zodResolver(refundForm),
+    defaultValues: {
+      value: 0,
+    },
   });
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleAttachment() {
+    inputRef.current?.click();
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setErrorAttachment('Tamanho máximo do arquivo é de 2MB');
+      return;
+    }
+
+    setFile(file);
+    setErrorAttachment('');
+  }
 
   async function handleSendRequest(data: RefundForm) {
     if (!file) {
-      alert('É obrigatório anexar um comprovante');
+      setErrorAttachment('Informe um comprovante');
       return;
     }
 
@@ -51,29 +81,10 @@ export function PageSolicitacaoNovo() {
 
       navigate('/solicitacao-enviada');
     } catch (error) {
-      toast.error('Erro ao excluir solicitação');
+      toast.error('Erro ao cadastrar solicitação');
 
       throw error;
     }
-  }
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function handleAttachment() {
-    inputRef.current?.click();
-  }
-
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Máximo 5MB');
-      return;
-    }
-
-    setFile(file);
   }
 
   return (
@@ -89,6 +100,7 @@ export function PageSolicitacaoNovo() {
             className="px-4 py-3 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100"
             {...register('title')}
           />
+          {errors.title && <p className="text-error text-md">{errors.title.message}</p>}
         </div>
 
         <div className="flex gap-4 mb-6">
@@ -98,21 +110,34 @@ export function PageSolicitacaoNovo() {
               className="px-4 py-3 border border-gray-300 text-gray-200 text-lg rounded-lg outline-none w-full"
               {...register('category')}
             >
+              <option value="">Selecione</option>
               <option value="food">Alimentação</option>
               <option value="hosting">Hospedagem</option>
               <option value="transport">Transporte</option>
               <option value="services">Serviços</option>
               <option value="other">Outros</option>
             </select>
+            {errors.category && <p className="text-error text-md">{errors.category.message}</p>}
           </div>
 
           <div className="flex-1">
             <label className="text-sm inline-block mb-2">VALOR</label>
-            <input
-              type="number"
-              className="px-4 py-3 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100"
-              {...register('value', { valueAsNumber: true })}
+            <Controller
+              control={control}
+              name="value"
+              render={({ field }) => (
+                <NumericFormat
+                  className="px-4 py-3 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100"
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  decimalScale={2}
+                  fixedDecimalScale
+                  onValueChange={(v) => field.onChange(v.floatValue)}
+                  value={field.value}
+                />
+              )}
             />
+            {errors.value && <p className="text-error text-md">{errors.value.message}</p>}
           </div>
         </div>
 
@@ -134,6 +159,7 @@ export function PageSolicitacaoNovo() {
             </button>
             <input type="file" ref={inputRef} className="hidden" onChange={handleFileChange} accept=".pdf,.jpg,.png" />
           </div>
+          {errorAttachment && <p className="text-error text-md">{errorAttachment}</p>}
         </div>
 
         <button
