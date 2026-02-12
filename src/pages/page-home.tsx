@@ -1,112 +1,64 @@
 import { CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { RegistroSolicitacao } from '../components/registro-solicitacao';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../lib/axios';
 import type { IRefund } from '../interface/IRefund';
 import { createSerializer, parseAsString, useQueryState } from 'nuqs';
-import { debounce } from '../helpers/utils';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-
-interface InfoListRefunds {
-  currentPage: number;
-  lastPage: number;
-}
 
 const toSearchParams = createSerializer({
   q: parseAsString,
 });
 
 export function PageHome() {
-  const [refunds, setRefunds] = useState<IRefund[]>();
-  const [infoListRefunds, setInfoListRefunds] = useState<InfoListRefunds>({
-    currentPage: 0,
-    lastPage: 0,
-  });
+  const [page, setPage] = useState(1);
 
   const [q, setQ] = useQueryState('q');
   const [inputValue, setInputValue] = useState('');
 
-  useEffect(() => {
-    async function fetchData() {
+  const {
+    data: refunds,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['refunds', page, q],
+    queryFn: async () => {
       const methodGet = q ? `/refunds${toSearchParams({ q })}` : '/refunds';
 
-      try {
-        const { data } = await api.get(methodGet);
+      const { data } = await api.get(methodGet, {
+        params: {
+          page: page,
+        },
+      });
 
-        setRefunds(data.refunds.data);
-        setInfoListRefunds(data.refunds.meta);
-      } catch (error) {
-        toast.error('Erro ao carregar lista');
+      return data.refunds;
+    },
+  });
 
-        throw error;
-      }
+  // efeito apenas para o toast
+  useEffect(() => {
+    if (isError) {
+      toast.error('Erro ao carregar lista');
     }
-
-    fetchData();
-  }, []);
-
-  async function handleFilterRequest() {
-    try {
-      const { data } = await api.get(`/refunds${toSearchParams({ q })}`);
-
-      setRefunds(data.refunds.data);
-      setInfoListRefunds(data.refunds.meta);
-    } catch (error) {
-      toast.error('Erro ao filtrar lista');
-
-      throw error;
-    }
-  }
-
-  const debouncedSetValue = useMemo(() => {
-    return debounce((value: string) => {
-      setQ(value);
-    }, 200);
-  }, [setQ]);
+  }, [isError]);
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
 
     setInputValue(value);
-    debouncedSetValue(value);
   }
 
-  async function handlePreviousPage() {
-    const previousPage = infoListRefunds.currentPage - 1;
-
-    try {
-      const { data } = await api.get('/refunds', {
-        params: {
-          page: previousPage,
-        },
-      });
-
-      setRefunds(data.refunds.data);
-      setInfoListRefunds(data.refunds.meta);
-    } catch (error) {
-      toast.error('Erro ao ir para a página anterior');
-
-      throw error;
-    }
+  function handleFilterRequest() {
+    setQ(inputValue);
   }
 
-  async function handleNextPage() {
-    const nextPage = infoListRefunds.currentPage + 1;
+  function handlePreviousPage() {
+    setPage((state) => state - 1);
+  }
 
-    try {
-      const { data } = await api.get('/refunds', {
-        params: {
-          page: nextPage,
-        },
-      });
-
-      setRefunds(data.refunds.data);
-      setInfoListRefunds(data.refunds.meta);
-    } catch (error) {
-      toast.error('Erro ao ir para a próxima página');
-
-      throw error;
-    }
+  function handleNextPage() {
+    setPage((state) => state + 1);
   }
 
   return (
@@ -122,41 +74,44 @@ export function PageHome() {
           value={inputValue}
         />
         <button
-          disabled={!inputValue}
-          className="bg-green-100 rounded-lg p-3 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
+          className="bg-green-100 rounded-lg p-3 hover:cursor-pointer hover:bg-green-200 transition duration-100"
           onClick={handleFilterRequest}
         >
           <MagnifyingGlassIcon className="text-white" size={24} />
         </button>
       </div>
 
-      <ul className="flex flex-col gap-2 mb-6">
-        {refunds?.map((refund) => (
-          <li key={refund.id}>
-            <RegistroSolicitacao {...refund} />
-          </li>
-        ))}
-      </ul>
+      {!isLoading && (
+        <ul className="flex flex-col gap-2 mb-6">
+          {refunds.data?.map((refund: IRefund) => (
+            <li key={refund.id}>
+              <RegistroSolicitacao {...refund} />
+            </li>
+          ))}
+        </ul>
+      )}
 
-      <div className="flex items-center justify-center gap-2.5">
-        <button
-          onClick={handlePreviousPage}
-          className="rounded-lg bg-green-100 p-1 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
-          disabled={infoListRefunds.currentPage <= 1}
-        >
-          <CaretLeftIcon size={24} className="text-white" />
-        </button>
+      {!isLoading && (
+        <div className="flex items-center justify-center gap-2.5">
+          <button
+            onClick={handlePreviousPage}
+            className="rounded-lg bg-green-100 p-1 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
+            disabled={refunds.meta.currentPage <= 1}
+          >
+            <CaretLeftIcon size={24} className="text-white" />
+          </button>
 
-        <span className="text-lg">{`${infoListRefunds.currentPage}/${infoListRefunds.lastPage}`}</span>
+          <span className="text-lg">{`${refunds.meta.currentPage}/${refunds.meta.lastPage}`}</span>
 
-        <button
-          onClick={handleNextPage}
-          className="rounded-lg bg-green-100 p-1 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
-          disabled={infoListRefunds.currentPage >= infoListRefunds.lastPage}
-        >
-          <CaretRightIcon size={24} className="text-white" />
-        </button>
-      </div>
+          <button
+            onClick={handleNextPage}
+            className="rounded-lg bg-green-100 p-1 enabled:hover:cursor-pointer enabled:hover:bg-green-200 transition duration-100 disabled:opacity-50"
+            disabled={refunds.meta.currentPage >= refunds.meta.lastPage}
+          >
+            <CaretRightIcon size={24} className="text-white" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

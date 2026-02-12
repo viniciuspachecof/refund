@@ -4,29 +4,28 @@ import { ExcluirSolicitacao } from '../components/excluir-solicitacao';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState, type FormEvent } from 'react';
 import { api } from '../lib/axios';
-import type { IRefund } from '../interface/IRefund';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 export function PageSolicitacaoDetalhes() {
   const { id } = useParams();
-  const [refund, setRefund] = useState<IRefund>();
   const [modalOpen, setModalOpen] = useState(false);
 
+  const { data: refund, isError } = useQuery({
+    queryKey: ['refund', id],
+    queryFn: async () => {
+      const { data } = await api.get(`/refunds/${id}`);
+
+      return data.refund;
+    },
+  });
+
+  // efeito apenas para o toast
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data } = await api.get(`/refunds/${id}`);
-
-        setRefund(data.refund);
-      } catch (error) {
-        toast.error('Erro ao recuperar solicitação');
-
-        throw error;
-      }
+    if (isError) {
+      toast.error('Erro ao recuperar solicitação');
     }
-
-    fetchData();
-  }, [id]);
+  }, [isError]);
 
   async function handleOpenProof(e: FormEvent) {
     e.preventDefault();
@@ -54,7 +53,7 @@ export function PageSolicitacaoDetalhes() {
             type="text"
             className="px-4 py-3 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100 disabled:bg-gray-400"
             disabled
-            value={refund?.title}
+            value={refund?.title ?? ''}
           />
         </div>
 
@@ -66,7 +65,7 @@ export function PageSolicitacaoDetalhes() {
               name=""
               id=""
               disabled
-              value={refund?.category}
+              value={refund?.category ?? ''}
             >
               <option value="food">Alimentação</option>
               <option value="hosting">Hospedagem</option>
@@ -82,7 +81,7 @@ export function PageSolicitacaoDetalhes() {
               type="text"
               className="px-4 py-3 border border-gray-300 text-gray-200 text-lg w-full rounded-lg outline-none focus:border-green-100 disabled:bg-gray-400"
               disabled
-              value={refund?.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              value={refund?.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) ?? ''}
             />
           </div>
         </div>
